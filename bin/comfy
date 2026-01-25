@@ -1,0 +1,6 @@
+#!/bin/bash -ex
+
+cd ~/comfyui
+source .venv/bin/activate
+perl -pi -e 's/network_mode = .*/network_mode = personal_cloud/' user/__manager/config.ini
+python main.py --use-sage-attention --listen --enable-manager --enable-manager-legacy-ui --output-directory ~/gdrive/comfyui/output

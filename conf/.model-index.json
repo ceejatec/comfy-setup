@@ -1,0 +1,99 @@
+{
+  "models": {
+    "zimage-yogi-v0": {
+      "url": "https://civitai.com/api/download/models/2500972?type=Model&format=SafeTensor&size=pruned&fp=bf16",
+      "subdirectory": "models/checkpoints/zit"
+    },
+    "qwen-abliterated-v2": {
+      "url": "https://civitai.com/api/download/models/2470137?type=Archive&format=Other",
+      "subdirectory": "models/text_encoders"
+    },
+    "zit-vae": {
+      "url": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors",
+      "subdirectory": "models/vae"
+    },
+    "wan-21-vae": {
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors",
+      "subdirectory": "models/vae"
+    },
+    "wan22-enhanced-svi-cf-fp8-H": {
+      "url": "https://civitai.com/api/download/models/2609141?type=Model&format=SafeTensor&size=full&fp=fp16",
+      "subdirectory": "models/diffusion_models"
+    },
+    "wan22-enhanced-svi-cf-fp8-L": {
+      "url": "https://civitai.com/api/download/models/2609148?type=Model&format=SafeTensor&size=full&fp=fp8",
+      "subdirectory": "models/diffusion_models"
+    },
+    "wan22-enhanced-svi-fm-fp8-H": {
+      "url": "https://civitai.com/api/download/models/2606405?type=Model&format=SafeTensor&size=full&fp=fp8",
+      "subdirectory": "models/diffusion_models"
+    },
+    "wan22-enhanced-svi-fm-fp8-L": {
+      "url": "https://civitai.com/api/download/models/2606408?type=Model&format=SafeTensor&size=full&fp=fp8",
+      "subdirectory": "models/diffusion_models"
+    },
+    "wan22-lightx2v-1022-H": {
+      "url": "https://huggingface.co/lightx2v/Wan2.2-Distill-Loras/resolve/main/wan2.2_i2v_A14b_high_noise_lora_rank64_lightx2v_4step_1022.safetensors?download=true",
+      "subdirectory": "models/loras/wan22/lightning"
+    },
+    "wan22-lightx2v-1022-L": {
+      "url": "https://huggingface.co/lightx2v/Wan2.2-Distill-Loras/resolve/main/wan2.2_i2v_A14b_low_noise_lora_rank64_lightx2v_4step_1022.safetensors?download=true",
+      "subdirectory": "models/loras/wan22/lightning"
+    },
+    "svi-v2-pro-H": {
+      "url": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Stable-Video-Infinity/v2.0/SVI_v2_PRO_Wan2.2-I2V-A14B_HIGH_lora_rank_128_fp16.safetensors?download=true",
+      "subdirectory": "models/loras/wan22/lightning"
+    },
+    "svi-v2-pro-L": {
+      "url": "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Stable-Video-Infinity/v2.0/SVI_v2_PRO_Wan2.2-I2V-A14B_LOW_lora_rank_128_fp16.safetensors?download=true",
+      "subdirectory": "models/loras/wan22/lightning"
+    },
+    "wan-nsfw-bf16": {
+      "url": "https://huggingface.co/zootkitty/nsfw_wan_umt5-xxl_bf16_fixed/resolve/main/nsfw_wan_umt5-xxl_bf16_fixed.safetensors?download=true",
+      "subdirectory": "models/text_encoders"
+    },
+    "wan22-a14b-H": {
+      "url": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-I2V-A14B-HighNoise-Q8_0.gguf?download=true",
+      "subdirectory": "models/diffusion_models"
+    },
+    "wan22-a14b-L": {
+      "url": "https://huggingface.co/QuantStack/Wan2.2-I2V-A14B-GGUF/resolve/main/LowNoise/Wan2.2-I2V-A14B-LowNoise-Q8_0.gguf?download=true",
+      "subdirectory": "models/diffusion_models"
+    },
+    "wan-umt5-fp16": {
+      "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp16.safetensors",
+      "subdirectory": "models/text_encoders"
+    }
+  },
+  "groups": {
+    "zit-v0": [
+      "qwen-abliterated-v2",
+      "zimage-yogi-v0",
+      "zit-vae"
+    ],
+    "wan22-lightning-loras": [
+      "wan22-lightx2v-1022-H",
+      "wan22-lightx2v-1022-L",
+      "svi-v2-pro-H",
+      "svi-v2-pro-L"
+    ],
+    "wan22-enhanced-cf": [
+      "wan22-enhanced-svi-cf-fp8-H",
+      "wan22-enhanced-svi-cf-fp8-L",
+      "wan22-lightning-loras",
+      "wan-nsfw-bf16"
+    ],
+    "wan22-enhanced-fm": [
+      "wan22-enhanced-svi-fm-fp8-H",
+      "wan22-enhanced-svi-fm-fp8-L",
+      "wan22-lightning-loras",
+      "wan-nsfw-bf16"
+    ],
+    "wan22": [
+      "wan22-a14b-L",
+      "wan22-a14b-H",
+      "wan22-lightning-loras",
+      "wan-umt5-fp16"
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+bin/* eol=lf
+conf/* eol=lf
+util/* eof=lf
