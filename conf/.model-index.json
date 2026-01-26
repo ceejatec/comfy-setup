@@ -64,6 +64,21 @@
     "wan-umt5-fp16": {
       "url": "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp16.safetensors",
       "subdirectory": "models/text_encoders"
+    },
+    "qwen-uncensored-aggressive": {
+      "url": "https://civitai.com/api/download/models/2470981?type=Archive&format=Other",
+      "subdirectory": "models/text_encoders",
+      "unzip": false
+    },
+    "zit-nsfw": {
+      "url": "https://civitai.com/api/download/models/2564499?type=Model&format=SafeTensor&size=pruned&fp=fp16",
+      "subdirectory": "models/checkpoints",
+      "unzip": false
+    },
+    "zimage-yogi-2601": {
+      "url": "https://civitai.com/api/download/models/2585636?type=Model&format=SafeTensor&size=full&fp=bf16",
+      "subdirectory": "models/checkpoints",
+      "unzip": false
     }
   },
   "groups": {
