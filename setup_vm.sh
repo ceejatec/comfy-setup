@@ -12,7 +12,7 @@ done
 
 cp ${SCRIPT_DIR}/conf/.model-index.json ~
 
-sudo apt-get update && sudo apt-get install -y nload
+sudo apt-get update && sudo apt-get install -y unzip nload
 
 pushd /tmp
 curl -LO https://downloads.rclone.org/v${RCLONE_VER}/rclone-v${RCLONE_VER}-linux-amd64.zip
@@ -21,7 +21,7 @@ mv rclone-v${RCLONE_VER}-linux-amd64/rclone ~/.local/bin
 popd
 
 mkdir ~/gdrive
-rclone mount --dir-cache-time 30s --rc --rc-no-auth --vfs-links --vfs-cache-mode full --vfs-cache-max-size 200G --daemon gdrive: ~/gdrive
+rclone mount --dir-cache-time 30s --vfs-links --vfs-cache-mode full --vfs-cache-max-size 200G --daemon gdrive: ~/gdrive
 
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
