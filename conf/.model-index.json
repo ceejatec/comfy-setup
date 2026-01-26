@@ -6,7 +6,8 @@
     },
     "qwen-abliterated-v2": {
       "url": "https://civitai.com/api/download/models/2470137?type=Archive&format=Other",
-      "subdirectory": "models/text_encoders"
+      "subdirectory": "models/text_encoders",
+      "unzip": true
     },
     "zit-vae": {
       "url": "https://huggingface.co/Comfy-Org/z_image_turbo/resolve/main/split_files/vae/ae.safetensors",

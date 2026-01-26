@@ -23,7 +23,7 @@ PRINT_LOCK = Lock()
 # ------------------- SIGINT handling -------------------
 def _sigint_handler(signum, frame):
     print("\nAborting downloads (Ctrl-C)", file=sys.stderr)
-    os._exit(130)  # immediate exit
+    os._exit(130)  # immediate exit, kills threads
 
 signal.signal(signal.SIGINT, _sigint_handler)
 
@@ -87,6 +87,7 @@ def expand_names(index, names):
     for n in names:
         expand(n)
 
+    # Deduplicate preserving order
     result = []
     for n in expanded:
         if n not in seen:
@@ -189,22 +190,40 @@ def cmd_dl(args):
             sys.exit("Error: -u and -d must be used together")
         if args.jobs is not None:
             sys.exit("Error: -j cannot be used with -u / -d")
-        index["models"][names[0]] = {"url": args.url, "subdirectory": args.subdirectory}
+
+        # Save model info including unzip flag
+        index["models"][names[0]] = {
+            "url": args.url,
+            "subdirectory": args.subdirectory,
+            "unzip": args.unzip
+        }
         save_index(index)
-        download_file(names[0], args.url, Path(args.subdirectory), force=args.force, unzip=args.unzip)
+
+        download_file(
+            names[0],
+            args.url,
+            Path(args.subdirectory),
+            force=args.force,
+            unzip=args.unzip
+        )
         return
 
-    # Prepare download tasks
+    # Download models from index (possibly multiple)
     tasks = []
     for name in names:
         if name not in index["models"]:
             sys.exit(f"Error: no entry for model '{name}'")
         m = index["models"][name]
-        tasks.append((name, m["url"], Path(m["subdirectory"]), args.force, False))  # unzip only applies to -u
+        tasks.append((
+            name,
+            m["url"],
+            Path(m["subdirectory"]),
+            args.force,
+            m.get("unzip", False)  # automatically apply stored unzip flag
+        ))
 
     jobs = args.jobs if args.jobs is not None else (4 if len(tasks) > 1 else 1)
 
-    # Parallel downloads
     with ThreadPoolExecutor(max_workers=jobs) as executor:
         futures = [executor.submit(download_file, *t) for t in tasks]
         for f in as_completed(futures):
@@ -217,7 +236,7 @@ def cmd_list(args):
             print(h)
     elif args.kind == "dl":
         for name, m in sorted(index["models"].items()):
-            print(f"{name}\t{m['subdirectory']}")
+            print(f"{name}\t{m['subdirectory']}\tunzip={m.get('unzip', False)}")
     elif args.kind == "group":
         for g, members in sorted(index["groups"].items()):
             print(f"{g}\t{' '.join(members)}")
