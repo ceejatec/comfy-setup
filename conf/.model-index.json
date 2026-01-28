@@ -103,13 +103,15 @@
       "wan22-enhanced-svi-fm-fp8-H",
       "wan22-enhanced-svi-fm-fp8-L",
       "wan22-lightning-loras",
-      "wan-nsfw-bf16"
+      "wan-nsfw-bf16",
+      "wan-21-vae"
     ],
     "wan22": [
       "wan22-a14b-L",
       "wan22-a14b-H",
       "wan22-lightning-loras",
-      "wan-umt5-fp16"
+      "wan-umt5-fp16",
+      "wan-21-vae"
     ]
   }
 }
