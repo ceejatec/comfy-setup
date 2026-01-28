@@ -54,3 +54,5 @@ uv pip install -r requirements.txt
 uv pip install -r manager_requirements.txt
 uv pip install triton
 uv pip install sageattention
+
+comfy

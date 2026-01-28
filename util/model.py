@@ -1,16 +1,20 @@
-#!/usr/bin/env python3
+# /// script
+# dependencies = [
+#   "requests",
+# ]
+# ///
 
 import argparse
 import json
 import os
 import sys
-import urllib.request
-import urllib.parse
 import zipfile
+import signal
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
-import signal
+from urllib.parse import urlparse
+import requests
 
 # ------------------- Globals -------------------
 HOME = Path.home()
@@ -23,11 +27,11 @@ PRINT_LOCK = Lock()
 # ------------------- SIGINT handling -------------------
 def _sigint_handler(signum, frame):
     print("\nAborting downloads (Ctrl-C)", file=sys.stderr)
-    os._exit(130)  # immediate exit, kills threads
+    os._exit(130)
 
 signal.signal(signal.SIGINT, _sigint_handler)
 
-# ------------------- Index handling -------------------
+# ------------------- Index / Token handling -------------------
 def load_index():
     if not INDEX_FILE.exists():
         return {"models": {}, "groups": {}}
@@ -45,7 +49,7 @@ def load_tokens():
         return json.load(f)
 
 # ------------------- Utilities -------------------
-def ensure_parent_dir(path):
+def ensure_parent_dir(path: Path):
     path.mkdir(parents=True, exist_ok=True)
 
 def get_filename_from_response(response, url):
@@ -55,8 +59,7 @@ def get_filename_from_response(response, url):
             part = part.strip()
             if part.lower().startswith("filename="):
                 return part.split("=", 1)[1].strip('"')
-    parsed = urllib.parse.urlparse(url)
-    return os.path.basename(parsed.path) or "downloaded.file"
+    return os.path.basename(urlparse(url).path) or "downloaded.file"
 
 def format_bytes(n):
     for unit in ("B", "KB", "MB", "GB", "TB"):
@@ -87,7 +90,6 @@ def expand_names(index, names):
     for n in names:
         expand(n)
 
-    # Deduplicate preserving order
     result = []
     for n in expanded:
         if n not in seen:
@@ -95,20 +97,21 @@ def expand_names(index, names):
             result.append(n)
     return result
 
-# ------------------- Download -------------------
+# ------------------- Download (requests-based) -------------------
 def download_file(name, url, subdirectory, force=False, unzip=False):
     tokens = load_tokens()
-    parsed = urllib.parse.urlparse(url)
-    hostname = parsed.hostname
+    hostname = urlparse(url).hostname
 
-    req = urllib.request.Request(url)
+    headers = {}
     if hostname and hostname in tokens:
-        req.add_unredirected_header("Authorization", f"Bearer {tokens[hostname]}")
+        headers["Authorization"] = f"Bearer {tokens[hostname]}"
 
     ensure_parent_dir(subdirectory)
 
-    with urllib.request.urlopen(req) as response:
-        filename = get_filename_from_response(response, url)
+    with requests.get(url, headers=headers, stream=True) as r:
+        r.raise_for_status()
+
+        filename = get_filename_from_response(r, url)
         target = subdirectory / filename
 
         if target.exists() and not force:
@@ -116,37 +119,45 @@ def download_file(name, url, subdirectory, force=False, unzip=False):
                 print(f"[{name}] Skipping (exists): {target}")
             return target
 
-        total = response.headers.get("Content-Length")
+        total = r.headers.get("Content-Length")
         total = int(total) if total else None
         downloaded = 0
 
-        with open(target, "wb") as out:
-            while True:
-                chunk = response.read(CHUNK_SIZE)
+        with open(target, "wb") as f:
+            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                 if not chunk:
-                    break
-                out.write(chunk)
+                    continue
+                f.write(chunk)
                 downloaded += len(chunk)
                 with PRINT_LOCK:
                     if total:
                         pct = downloaded / total * 100
-                        print(f"\r[{name}] {pct:6.2f}% ({format_bytes(downloaded)} / {format_bytes(total)})", end="", flush=True)
+                        print(
+                            f"\r[{name}] {pct:6.2f}% "
+                            f"({format_bytes(downloaded)} / {format_bytes(total)})",
+                            end="",
+                            flush=True,
+                        )
                     else:
-                        print(f"\r[{name}] {format_bytes(downloaded)}", end="", flush=True)
+                        print(
+                            f"\r[{name}] {format_bytes(downloaded)}",
+                            end="",
+                            flush=True,
+                        )
 
-        with PRINT_LOCK:
-            print(f"\n[{name}] Done → {target}")
+    with PRINT_LOCK:
+        print(f"\n[{name}] Done → {target}")
 
     # ------------------- unzip if requested -------------------
     if unzip:
         if not zipfile.is_zipfile(target):
-            print(f"[{name}] WARNING: file is not a valid zip: {target}", file=sys.stderr)
+            print(f"[{name}] WARNING: not a zip file: {target}", file=sys.stderr)
         else:
             with PRINT_LOCK:
                 print(f"[{name}] Unzipping {target} ...")
-            with zipfile.ZipFile(target, 'r') as zip_ref:
-                zip_ref.extractall(subdirectory)
-            target.unlink()  # remove the original zip
+            with zipfile.ZipFile(target, "r") as z:
+                z.extractall(subdirectory)
+            target.unlink()
             with PRINT_LOCK:
                 print(f"[{name}] Unzipped and removed {target}")
 
@@ -169,9 +180,11 @@ def cmd_group(args):
         save_index(index)
         print(f"Deleted group '{args.group}'")
         return
+
     for m in args.models:
         if m not in index["models"] and m not in index["groups"]:
             sys.exit(f"Error: unknown model or group '{m}'")
+
     index["groups"][args.group] = args.models
     save_index(index)
     print(f"Saved group '{args.group}': {' '.join(args.models)}")
@@ -182,7 +195,7 @@ def cmd_dl(args):
     names = [n for n in args.names if not (n in seen or seen.add(n))]
     names = expand_names(index, names)
 
-    # Single download with -u/-d
+    # Register single model
     if args.url or args.subdirectory:
         if len(names) != 1:
             sys.exit("Error: -u / -d require exactly one model name")
@@ -191,11 +204,10 @@ def cmd_dl(args):
         if args.jobs is not None:
             sys.exit("Error: -j cannot be used with -u / -d")
 
-        # Save model info including unzip flag
         index["models"][names[0]] = {
             "url": args.url,
             "subdirectory": args.subdirectory,
-            "unzip": args.unzip
+            "unzip": args.unzip,
         }
         save_index(index)
 
@@ -204,23 +216,24 @@ def cmd_dl(args):
             args.url,
             Path(args.subdirectory),
             force=args.force,
-            unzip=args.unzip
+            unzip=args.unzip,
         )
         return
 
-    # Download models from index (possibly multiple)
     tasks = []
     for name in names:
         if name not in index["models"]:
             sys.exit(f"Error: no entry for model '{name}'")
         m = index["models"][name]
-        tasks.append((
-            name,
-            m["url"],
-            Path(m["subdirectory"]),
-            args.force,
-            m.get("unzip", False)  # automatically apply stored unzip flag
-        ))
+        tasks.append(
+            (
+                name,
+                m["url"],
+                Path(m["subdirectory"]),
+                args.force,
+                m.get("unzip", False),
+            )
+        )
 
     jobs = args.jobs if args.jobs is not None else (4 if len(tasks) > 1 else 1)
 
@@ -262,7 +275,7 @@ def main():
     p.add_argument("-d", "--subdirectory")
     p.add_argument("-j", "--jobs", type=int)
     p.add_argument("-f", "--force", action="store_true")
-    p.add_argument("-z", "--unzip", action="store_true", help="Unzip downloaded zip file in place")
+    p.add_argument("-z", "--unzip", action="store_true")
     p.set_defaults(func=cmd_dl)
 
     p = sub.add_parser("list")
