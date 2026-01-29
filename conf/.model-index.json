@@ -68,7 +68,7 @@
     "qwen-uncensored-aggressive": {
       "url": "https://civitai.com/api/download/models/2470981?type=Archive&format=Other",
       "subdirectory": "models/text_encoders",
-      "unzip": true
+      "unzip": false
     },
     "zit-nsfw": {
       "url": "https://civitai.com/api/download/models/2564499?type=Model&format=SafeTensor&size=pruned&fp=fp16",
@@ -78,6 +78,11 @@
     "zimage-yogi-2601": {
       "url": "https://civitai.com/api/download/models/2585636?type=Model&format=SafeTensor&size=full&fp=bf16",
       "subdirectory": "models/checkpoints",
+      "unzip": false
+    },
+    "zit-mystic": {
+      "url": "https://civitai.com/api/download/models/2581135?type=Model&format=SafeTensor",
+      "subdirectory": "models/loras/porn",
       "unzip": false
     }
   },
@@ -97,8 +102,7 @@
       "wan22-enhanced-svi-cf-fp8-H",
       "wan22-enhanced-svi-cf-fp8-L",
       "wan22-lightning-loras",
-      "wan-nsfw-bf16",
-      "wan-21-vae"
+      "wan-nsfw-bf16"
     ],
     "wan22-enhanced-fm": [
       "wan22-enhanced-svi-fm-fp8-H",
