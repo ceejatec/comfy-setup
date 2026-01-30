@@ -84,6 +84,11 @@
       "url": "https://civitai.com/api/download/models/2581135?type=Model&format=SafeTensor",
       "subdirectory": "models/loras/porn",
       "unzip": false
+    },
+    "zit": {
+      "url": "https://civitai.com/api/download/models/2442439?type=Model&format=SafeTensor&size=full&fp=bf16",
+      "subdirectory": "models/diffusion_models",
+      "unzip": false
     }
   },
   "groups": {
